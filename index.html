@@ -85,7 +85,7 @@
         <p class="sub">La9rab lik kay-ban l-ouwel. Brek WhatsApp bach t-twasel, w brek ⭐ bach t-9eyyem.</p>
         <div class="filters">
             <select id="filterQuartier">
-                <option value="">Kolchi - Tous les quartiers</option>
+                <option value="">Tous les quartiers</option>
                 <option>Aourir</option><option>Drarga</option><option>Inezgane</option><option>Agadir centre</option><option>Tamraght</option><option>Taghazout</option>
             </select>
             <select id="filterVehicule">
@@ -130,8 +130,8 @@
                 <div id="roleField" style="display:none">
                     <label>Ana:</label>
                     <select id="authRole">
-                        <option value="passager">Passager - bghit n-mchi</option>
-                        <option value="conducteur">Conducteur - 3endi voiture / moto</option>
+                        <option value="passager">Passager</option>
+                        <option value="conducteur">Conducteur-voiture/ moto</option>
                     </select>
                 </div>
                 <div id="quartierField" style="display:none">
@@ -142,10 +142,10 @@
                 </div>
                 <label>Mot de passe *</label>
                 <input id="authPass" type="password" required placeholder="••••••••">
-                <button class="pill full" id="authSubmit" type="submit">Dkhol</button>
+                <button class="pill full" id="authSubmit" type="submit">Entre</button>
                 <p id="authMsg"></p>
             </form>
-            <button id="switchAuth" type="button" class="linkbtn">Ma 3endich compte? Sign Up hna</button>
+            <button id="switchAuth" type="button" class="linkbtn">Vous navez pas de compte? S'inscrire</button>
         </div>
     </div>
 
@@ -153,7 +153,7 @@
         <div class="box">
             <button class="close" id="closeTrip" type="button">×</button>
             <h2>Proposer un trajet</h2>
-            <p class="boxsub">Goul fin kayn, fin ghadi, w bch7al, w s7abek li 9rab lik ghadi y-choufouk.</p>
+            <p class="boxsub">Décrivez votre trajet</p>
             <form id="tripForm">
                 <label>Menin - Départ *</label>
                 <select id="tripFrom" required>
@@ -169,7 +169,7 @@
                 <input id="tripPlaces" type="number" min="1" max="4" value="3" required>
                 <label>Prix par personne (DH) *</label>
                 <input id="tripPrix" type="number" min="0" value="10" required>
-                <p class="hint">Prix kay-tbeddel: ila kan b3id, zid chwiya. Ila kan 9rib, n9es chwiya.</p>
+                <p class="hint">Le prix peut être ajusté selon la distance et la demande.</p>
                 <button class="pill full" type="submit">Publier mon trajet</button>
                 <p id="tripMsg"></p>
             </form>
@@ -180,7 +180,7 @@
         <div class="box">
             <button class="close" id="closeRate" type="button">×</button>
             <h2>Note ton conducteur ⭐</h2>
-            <p class="boxsub" id="rateName">Kifach kan trajet?</p>
+            <p class="boxsub" id="rateName">comment vais-je trajet?</p>
             <div class="stars" id="stars">
                 <button type="button" data-star="1">★</button><button type="button" data-star="2">★</button><button type="button" data-star="3">★</button><button type="button" data-star="4">★</button><button type="button" data-star="5">★</button>
             </div>
