@@ -80,7 +80,116 @@
         </div>
     </section>
 
-    
+    <section class="trajets" id="trajets">
+        <h2>Trajets disponibles vers CMC Drarga</h2>
+        <p class="sub">La9rab lik kay-ban l-ouwel. Brek WhatsApp bach t-twasel, w brek ⭐ bach t-9eyyem.</p>
+        <div class="filters">
+            <select id="filterQuartier">
+                <option value="">Kolchi - Tous les quartiers</option>
+                <option>Aourir</option><option>Drarga</option><option>Inezgane</option><option>Agadir centre</option><option>Tamraght</option><option>Taghazout</option>
+            </select>
+            <select id="filterVehicule">
+                <option value="">Voiture + Moto</option><option value="Voiture">Voiture</option><option value="Moto">Moto</option>
+            </select>
+            <button class="pill small" id="filterBtn" type="button">Chercher</button>
+        </div>
+        <div id="trajetList" class="cards"></div>
+        <p id="noTrajet" style="display:none">Ma kayn ta trajet daba f had quartier. Proposer wa7ed, wla beddel quartier.</p>
+    </section>
+
+    <section class="contact" id="contact">
+        <div>
+            <h2 class="con">Contact</h2>
+            <p class="question">Une question, une idée, un problème ? Écris-nous, nous répondons vite.</p>
+        </div>
+        <form id="cf" novalidate>
+            <label for="cn">Nom</label><input id="cn" name="name" autocomplete="name" required>
+            <label for="ce">Email</label><input id="ce" name="email" type="email" autocomplete="email" required>
+            <label for="cm">Message</label><textarea id="cm" name="message" rows="4" required></textarea>
+            <button class="pill" type="submit">Envoyer</button>
+            <p id="cs" role="status"></p>
+        </form>
+    </section>
+
+    <footer>
+        <span class="wm">ridemates</span><span>© 2026 RideMates · Covoiturage étudiant CMC Drarga</span>
+    </footer>
+
+    <div class="modal" id="authModal">
+        <div class="box">
+            <button class="close" id="closeAuth" type="button">×</button>
+            <h2 id="authTitle">Se connecter</h2>
+            <p class="boxsub">Ghir dyal CMC Drarga: Aourir, Drarga, Inezgane, Agadir.</p>
+            <form id="authForm">
+                <div id="nameField" style="display:none">
+                    <label>Nom complet</label>
+                    <input id="authName" placeholder="Smiytek kamla">
+                </div>
+                <label>Téléphone / WhatsApp *</label>
+                <input id="authTel" required placeholder="06 XX XX XX XX">
+                <div id="roleField" style="display:none">
+                    <label>Ana:</label>
+                    <select id="authRole">
+                        <option value="passager">Passager - bghit n-mchi</option>
+                        <option value="conducteur">Conducteur - 3endi voiture / moto</option>
+                    </select>
+                </div>
+                <div id="quartierField" style="display:none">
+                    <label>Quartier dyalek *</label>
+                    <select id="authQuartier">
+                        <option>Aourir</option><option>Drarga</option><option>Inezgane</option><option>Agadir centre</option><option>Tamraght</option><option>Taghazout</option><option>Autre</option>
+                    </select>
+                </div>
+                <label>Mot de passe *</label>
+                <input id="authPass" type="password" required placeholder="••••••••">
+                <button class="pill full" id="authSubmit" type="submit">Dkhol</button>
+                <p id="authMsg"></p>
+            </form>
+            <button id="switchAuth" type="button" class="linkbtn">Ma 3endich compte? Sign Up hna</button>
+        </div>
+    </div>
+
+    <div class="modal" id="tripModal">
+        <div class="box">
+            <button class="close" id="closeTrip" type="button">×</button>
+            <h2>Proposer un trajet</h2>
+            <p class="boxsub">Goul fin kayn, fin ghadi, w bch7al, w s7abek li 9rab lik ghadi y-choufouk.</p>
+            <form id="tripForm">
+                <label>Menin - Départ *</label>
+                <select id="tripFrom" required>
+                    <option>Aourir</option><option>Drarga</option><option>Inezgane</option><option>Agadir centre</option><option>Tamraght</option><option>Taghazout</option>
+                </select>
+                <label>Fin - Arrivée *</label>
+                <input id="tripTo" value="CMC Drarga" required>
+                <label>Heure *</label>
+                <input id="tripHeure" type="time" required>
+                <label>Véhicule *</label>
+                <select id="tripVehicule"><option>Voiture</option><option>Moto</option></select>
+                <label>Places disponibles *</label>
+                <input id="tripPlaces" type="number" min="1" max="4" value="3" required>
+                <label>Prix par personne (DH) *</label>
+                <input id="tripPrix" type="number" min="0" value="10" required>
+                <p class="hint">Prix kay-tbeddel: ila kan b3id, zid chwiya. Ila kan 9rib, n9es chwiya.</p>
+                <button class="pill full" type="submit">Publier mon trajet</button>
+                <p id="tripMsg"></p>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="rateModal">
+        <div class="box">
+            <button class="close" id="closeRate" type="button">×</button>
+            <h2>Note ton conducteur ⭐</h2>
+            <p class="boxsub" id="rateName">Kifach kan trajet?</p>
+            <div class="stars" id="stars">
+                <button type="button" data-star="1">★</button><button type="button" data-star="2">★</button><button type="button" data-star="3">★</button><button type="button" data-star="4">★</button><button type="button" data-star="5">★</button>
+            </div>
+            <p id="rateMsg"></p>
+            <button class="pill full" id="saveRate" type="button">Sauvegarder ma note</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
    
 </body>
 </html>
