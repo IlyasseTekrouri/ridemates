@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <title>RideMates – Covoiturage entre étudiants de CMC Drarga</title>
@@ -15,106 +15,21 @@
     <header class="top">
         <a class="logo" href="index.html" aria-label="RideMates, accueil">
             <img src="image/logo-pin.png" alt="ridemates logo" width="34" height="40">
-            <span class="wm" >ridemates</span>
-        </a>    
+            <span class="wm">ridemates</span>
+        </a>
         <button class="burger" id="bg" aria-label="Menu" aria-expanded="false" aria-controls="nv"><span></span><span></span><span></span></button>
         <nav class="nav" id="nv">
             <ul>
-                <li><a href="#Accueil">Accueil</a></li>
-                <li><a href="#Comment ça marche">Comment ça marche</a></li>
-                <li><a href="#Contact">Contact</a></li>
-                <li><a class="Se-connecter" href="">Se connecter</a></li>
+                <li><a href="#accueil">Accueil</a></li>
+                <li><a href="#comment">Comment ça marche</a></li>
+                <li><a href="#trajets">Trajets</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><button class="Se-connecter" id="authBtn" type="button">Se connecter</button></li>
+                <li id="userBox" style="display:none"><b id="userName"></b> <button id="logoutBtn" type="button">Sortir</button></li>
             </ul>
-            
         </nav>
     </header>
-    <hr/>
-    <section class="hero">
-        <div class="in">
-            <h1>Covoiturez avec des amis,<br><em>allez plus loin.</em><br>Partagez votre trajet,<br>réduisez votre empreinte.</h1>
-            <p>Entre étudiants de CMC Drarga : voiture ou moto, frais partagés, profils vérifiés.</p>
-            <div class="btns">
-                <a class="pill" href="">Proposer un trajet</a>
-                <a class="pill out" href="">Trouver un trajet</a>
-            </div>
-        </div>
-    </section>
-    <section class="split">
-        <div class="map" role="img" aria-label="Carte avec des points de rendez-vous">
-            <svg viewBox="0 0 220 300" preserveAspectRatio="xMidYMid slice">
-                <rect width="220" height="300" fill="#eef1ef"/>
-                <path d="M0 70L220 40M0 170L220 130M60 0L90 300M150 0L130 300M0 250L220 230" stroke="#fff" stroke-width="10"/>
-                <path d="M0 70L220 40M0 170L220 130" stroke="#dfe5e1" stroke-width="1"/>
-                <rect x="95" y="175" width="40" height="35" rx="8" fill="#cfe9c0"/>
-                <rect x="20" y="85" width="35" height="30" rx="8" fill="#d9eccd"/>
-                <g fill="#A8D76B" stroke="#fff" stroke-width="3">
-                    <path d="M60 60a12 12 0 00-12 12c0 9 12 21 12 21s12-12 12-21a12 12 0 00-12-12z"/>
-                    <path d="M165 80a12 12 0 00-12 12c0 9 12 21 12 21s12-12 12-21a12 12 0 00-12-12z"/>
-                    <path d="M110 150a12 12 0 00-12 12c0 9 12 21 12 21s12-12 12-21a12 12 0 00-12-12z"/>
-                </g>
-                <g fill="#fff">
-                    <circle cx="60" cy="72" r="4"/>
-                    <circle cx="165" cy="92" r="4"/>
-                    <circle cx="110" cy="162" r="4"/>
-                </g>
-            </svg>
-        </div>
-        <div id="comment">
-            <h2>Comment ça marche</h2>
-            <ol class="steps">
-                <li>
-                    <span class="sic">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z"/>
-                        </svg>
-                    </span>
-                    <div>
-                        <b>1. Publie ou cherche un trajet</b>
-                        <p>Indique ton quartier, l’heure et ton véhicule (voiture ou moto).</p>
-                    </div>
-                </li>
-                <li>
-                    <span class="sic">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-8 9c0-4 4-6 8-6s8 2 8 6z"/>
-                        </svg>
-                    </span>
-                    <div>
-                        <b>2. Réserve ta place</b>
-                        <p>Le conducteur accepte ta demande. Les profils sont vérifiés.</p>
-                    </div>
-                </li>
-                <li>
-                    <span class="sic">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M5 11l2-5h10l2 5h1v7h-3v-2H7v2H4v-7zm3-3l-1 3h10l-1-3z"/>
-                        </svg>
-                    </span>
-                    <div>
-                        <b>3. Voyage ensemble</b>
-                        <p>Partage les frais et arrive à CMC Drarga.</p>
-                    </div>
-                </li>
-            </ol>
-        </div>
-    </section>
-    <section class="contact" id="contact">
-        <div>
-            <h2 class="con">Contact</h2>
-            <p class="question">Une question, une idée, un problème ? Écris-nous, nous répondons vite.</p>
-        </div>
-        <form id="cf" novalidate>
-            <label for="cn">Nom</label><input id="cn" name="name" autocomplete="name" required>
-            <label for="ce">Email</label><input id="ce" name="email" type="email" autocomplete="email" required>
-            <label for="cm">Message</label><textarea id="cm" name="message" rows="4" required></textarea>
-            <button class="pill" type="submit">Envoyer</button>
-            <p id="cs" role="status"></p>
-        </form>
-    </section>
-    <footer>
-        <span class="wm">ridemates</span><span>© 2026 RideMates · Covoiturage étudiant CMC Drarga</span>
-    </footer>
 
-    <script src="se-connecter.js"></script>
+   
 </body>
 </html>
