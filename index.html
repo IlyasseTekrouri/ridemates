@@ -29,7 +29,58 @@
             </ul>
         </nav>
     </header>
+ <section class="hero" id="accueil">
+        <div class="in">
+            <h1>Covoiturez avec des amis,<br><em>allez plus loin.</em><br>Partagez votre trajet,<br>réduisez votre empreinte.</h1>
+            <p>Entre étudiants de CMC Drarga : voiture ou moto, frais partagés, profils vérifiés.</p>
+            <div class="btns">
+                <button class="pill" id="btnProposer" type="button">Proposer un trajet</button>
+                <button class="pill out" id="btnTrouver" type="button">Trouver un trajet</button>
+            </div>
+            <p id="helloMsg" class="hello"></p>
+        </div>
+    </section>
 
+    <section class="split">
+        <div class="map" role="img" aria-label="Carte avec des points de rendez-vous">
+            <svg viewBox="0 0 220 300" preserveAspectRatio="xMidYMid slice">
+                <rect width="220" height="300" fill="#eef1ef"/>
+                <path d="M0 70L220 40M0 170L220 130M60 0L90 300M150 0L130 300M0 250L220 230" stroke="#fff" stroke-width="10"/>
+                <path d="M0 70L220 40M0 170L220 130" stroke="#dfe5e1" stroke-width="1"/>
+                <rect x="95" y="175" width="40" height="35" rx="8" fill="#cfe9c0"/>
+                <rect x="20" y="85" width="35" height="30" rx="8" fill="#d9eccd"/>
+                <g fill="#A8D76B" stroke="#fff" stroke-width="3">
+                    <path d="M60 60a12 12 0 00-12 12c0 9 12 21 12 21s12-12 12-21a12 12 0 00-12-12z"/>
+                    <path d="M165 80a12 12 0 00-12 12c0 9 12 21 12 21s12-12 12-21a12 12 0 00-12-12z"/>
+                    <path d="M110 150a12 12 0 00-12 12c0 9 12 21 12 21s12-12 12-21a12 12 0 00-12-12z"/>
+                </g>
+                <g fill="#fff">
+                    <circle cx="60" cy="72" r="4"/>
+                    <circle cx="165" cy="92" r="4"/>
+                    <circle cx="110" cy="162" r="4"/>
+                </g>
+            </svg>
+        </div>
+        <div id="comment">
+            <h2>Comment ça marche</h2>
+            <ol class="steps">
+                <li>
+                    <span class="sic"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7z"/></svg></span>
+                    <div><b>1. Publie ou cherche un trajet</b><p>Indique ton quartier, l’heure et ton véhicule (voiture ou moto).</p></div>
+                </li>
+                <li>
+                    <span class="sic"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zm-8 9c0-4 4-6 8-6s8 2 8 6z"/></svg></span>
+                    <div><b>2. Réserve ta place</b><p>Le conducteur le plus proche accepte ta demande. Les profils sont vérifiés.</p></div>
+                </li>
+                <li>
+                    <span class="sic"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M5 11l2-5h10l2 5h1v7h-3v-2H7v2H4v-7zm3-3l-1 3h10l-1-3z"/></svg></span>
+                    <div><b>3. Voyage ensemble</b><p>Partage les frais, arrive à CMC Drarga, et note ton conducteur.</p></div>
+                </li>
+            </ol>
+        </div>
+    </section>
+
+    
    
 </body>
 </html>
