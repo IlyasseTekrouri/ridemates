@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>inDrive — CMC Drarga V10</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font:400 16px/1.55 Inter,system-ui,sans-serif;background:#181818;color:#fff;overflow:hidden}
+button,input,select{font:inherit}
+.screen{display:none;height:100dvh;overflow:auto;background:#181818}.screen.on{display:block}
+.lime{background:#b8e62e!important;color:#111!important}
+.bigBtn{width:100%;padding:17px;border:0;border-radius:16px;font-size:19px;font-weight:700;cursor:pointer;margin-top:18px}
+.ghostBtn{width:100%;padding:15px;border:1px solid #333;border-radius:16px;background:#222;color:#fff;font-weight:600;cursor:pointer;margin-top:10px}
+.field{width:100%;background:#2b2b2b;border:2px solid transparent;color:#fff;border-radius:16px;padding:16px;margin-bottom:12px;outline:none}
+.field:focus{border-color:#b8e62e}
+.logoBig{display:flex;align-items:center;gap:8px;font-size:32px;font-weight:900}
+.logoBox{width:46px;height:46px;background:#b8e62e;color:#111;border-radius:13px;display:grid;place-items:center;font-size:26px;font-weight:900}
+.loadWrap{width:210px;height:5px;background:#333;border-radius:99px;margin:28px auto 10px;overflow:hidden}
+.loadBar{height:100%;width:0;background:#b8e62e;animation:load 5s linear forwards}
+@keyframes load{to{width:100%}}
+.circleLoad{width:200px;height:200px;border:3px dashed #333;border-radius:50%;position:relative;margin:30px auto}
+.circleLoad .car{position:absolute;top:50%;left:50%;font-size:52px;animation:orbit 2.2s linear infinite}
+@keyframes orbit{from{transform:rotate(0) translateX(100px) rotate(0)}to{transform:rotate(360deg) translateX(100px) rotate(-360deg)}}
+.otpDots{display:flex;gap:18px;margin:24px 0}.otpDots i{width:18px;height:18px;border-radius:50%;background:#555}.otpDots i.fill{background:#b8e62e}
+.otpBox{display:flex;gap:10px}.otpBox input{width:58px;height:64px;text-align:center;font-size:28px;font-weight:900;background:#2b2b2b;border:2px solid #444;color:#fff;border-radius:16px}
+#sidebar{position:fixed;top:0;left:0;bottom:0;width:330px;max-width:86vw;background:#242424;z-index:9000;transform:translateX(-105%);transition:.3s;overflow:auto}
+#sidebar.open{transform:none}
+.profileHead{display:flex;gap:12px;align-items:center;padding:20px;width:100%;background:none;border:0;border-bottom:1px solid #333;color:#fff;text-align:start;cursor:pointer}
+.ava{width:56px;height:56px;border-radius:50%;background:#b8e62e;color:#111;display:grid;place-items:center;font-weight:900;font-size:22px;overflow:hidden;flex:0 0 56px}.ava img{width:100%;height:100%;object-fit:cover}
+.menuBtn{display:flex;gap:16px;width:100%;text-align:start;padding:17px 20px;background:none;border:0;border-bottom:1px solid #2c2c2c;color:#fff;font-size:18px;font-weight:600;cursor:pointer}
+.socialRow{display:flex;gap:20px;justify-content:center;margin-top:18px;font-size:24px}.socialRow a{color:#fff;text-decoration:none}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:8500;display:none}.overlay.show{display:block}
+.top{position:absolute;top:0;left:0;right:0;z-index:2000;display:flex;justify-content:space-between;padding:12px}
+.iconBtn{width:48px;height:48px;border-radius:50%;border:0;background:#181818;color:#fff;font-size:22px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+#map{position:absolute;inset:0;z-index:1;background:#111}
+.pickup{position:absolute;top:76px;left:50%;transform:translateX(-50%);z-index:1500;background:#111;color:#fff;padding:10px 14px;border-radius:14px;font-weight:700;white-space:nowrap;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:1600;background:#181818;border-radius:26px 26px 0 0;padding:16px;max-width:560px;margin:0 auto;max-height:58%;overflow:auto}
+.tabs{display:flex;gap:8px}.tab{flex:1;border:1px solid #333;background:#222;color:#fff;border-radius:16px;padding:10px;text-align:center;cursor:pointer;font-weight:700}.tab.on{background:#2e2a8f;border-color:#2e2a8f}
+.card{background:#222;border:1px solid #333;border-radius:20px;padding:14px;margin-top:12px}
+.pillBtn{padding:11px 14px;border-radius:99px;border:0;background:#b8e62e;color:#111;font-weight:800;cursor:pointer;flex:1}
+.ghostPill{padding:11px 14px;border-radius:99px;border:1px solid #444;background:#2b2b2b;color:#fff;font-weight:700;cursor:pointer;flex:1}
+.chatBox{display:flex;flex-direction:column;gap:8px;min-height:260px;max-height:44vh;overflow:auto;padding:10px 0}
+.msg{max-width:82%;padding:10px 13px;border-radius:18px}.me{align-self:flex-end;background:#b8e62e;color:#111}.other{align-self:flex-start;background:#2b2b2b}
+.notif{position:fixed;inset:0;z-index:9900;background:rgba(0,0,0,.85);display:none;place-items:center;padding:20px}.notif.show{display:grid}.notif .box{background:#222;border:1px solid #444;border-radius:24px;padding:24px;max-width:430px;width:100%;text-align:center}
+.setRow{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #2c2c2c;width:100%;background:none;border:0;color:#fff;text-align:start;cursor:pointer}.setRow small{display:block;color:#999}
+.toggle{width:52px;height:30px;border-radius:99px;border:0;background:#444;position:relative;cursor:pointer;flex:0 0 52px}.toggle.on{background:#b8e62e}.toggle:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;background:#fff;border-radius:50%}.toggle.on:after{left:25px}
+.incomeRow{display:flex;gap:14px;align-items:center;padding:16px 0;border-bottom:1px solid #2c2c2c;width:100%;background:none;border:0;color:#fff;text-align:start;cursor:pointer}
+.incomeRow .ic{width:64px;height:64px;border-radius:18px;background:#e8e8e8;display:grid;place-items:center;font-size:32px;flex:0 0 64px}
+.docGrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:14px 0}
+.docBox{aspect-ratio:1;background:#2b2b2b;border-radius:18px;display:grid;place-items:center;font-size:32px;cursor:pointer;overflow:hidden;position:relative}
+.docBox img{width:100%;height:100%;object-fit:cover}
+.docBox .opt{position:absolute;top:0;right:0;background:#555;color:#fff;font-size:11px;padding:4px 8px;border-radius:0 0 0 12px}
+.docLbl{font-size:12px;text-align:center;color:#ddd;line-height:1.3}
+.stepFoot{display:flex;gap:10px;align-items:flex-end;margin-top:16px}
+.stepFoot .back{width:64px;height:58px;border-radius:18px;border:0;background:#333;color:#fff;font-size:22px;cursor:pointer}
+.stepFoot .next{flex:1;padding:17px;border:0;border-radius:18px;background:#b8e62e;font-size:19px;font-weight:800;cursor:pointer}
+.timeline{display:flex;flex-direction:column;gap:0;margin:18px 0}
+.tl{display:flex;gap:14px;position:relative;padding-bottom:26px}
+.tl:before{content:"";position:absolute;left:24px;top:52px;bottom:0;width:2px;background:#333}
+.tl:last-child:before{display:none}
+.tl .dot{width:50px;height:50px;border-radius:50%;background:#333;display:grid;place-items:center;font-size:22px;flex:0 0 50px;z-index:1}
+.tl.dim{opacity:.45}
+.chooseVeh{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.chooseVeh button{padding:22px 10px;border-radius:20px;border:2px solid #333;background:#222;color:#fff;font-size:17px;font-weight:800;cursor:pointer}
+.chooseVeh button.on{border-color:#b8e62e;background:#26331a}
+.countryList{max-height:46vh;overflow:auto;margin-top:12px}
+.countryList button{display:flex;gap:12px;width:100%;padding:14px;background:none;border:0;border-bottom:1px solid #2c2c2c;color:#fff;font-size:17px;cursor:pointer;text-align:start}
+[dir="rtl"] #sidebar{left:auto;right:0;transform:translateX(105%)}[dir="rtl"] #sidebar.open{transform:none}
+</style>
+</head>
+<body>
+
+<!-- SPLASH - BREK AY BLASSA = KAY-MCHI, MAX 5 SEC -->
+<div class="screen on" id="splash" onclick="goS1()" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;cursor:pointer">
+<div class="logoBig"><span class="logoBox">iD</span> inDrive</div>
+<p style="color:#999;margin-top:12px" id="splashTxt">Loading… 5 seconds — brek hna bach t-mchi daba</p>
+<div class="loadWrap"><div class="loadBar"></div></div>
+<p style="color:#666;font-size:12px">CMC Drarga • Agadir • Fair deals</p>
+<button class="bigBtn lime" style="max-width:320px">Continue →</button>
+</div>
+
+<div class="screen" id="s1" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px">
+<div class="logoBig"><span class="logoBox">iD</span> inDrive</div>
+<div style="width:250px;height:210px;background:#b8e62e;border-radius:24px;display:grid;place-items:center;font-size:88px;margin:22px 0;transform:rotate(-3deg)">🤝</div>
+<h1 style="font-size:32px;line-height:1.2">Your app for fair deals</h1><p style="color:#bbb;margin-top:8px">Choose rides that are right for you</p><p style="margin:18px 0">● ○</p>
+<button class="bigBtn lime" id="c1">Continue</button>
+<p style="color:#999;font-size:13px;margin-top:16px">Joining our app means you agree with our <u>Terms of Use</u> and <u>Privacy Policy</u></p>
+</div>
+
+<div class="screen" id="s2" style="padding:22px">
+<button onclick="show('s1')" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button>
+<h1 style="font-size:32px;margin-top:14px">Join us via phone number</h1><p style="color:#bbb;margin:8px 0 20px">We’ll text a code to verify your phone</p>
+<div style="display:flex;gap:8px;align-items:center;background:#2b2b2b;border:2px solid #fff;border-radius:16px;padding:6px 12px">
+<button id="flagBtn" style="background:none;border:0;font-size:26px;cursor:pointer;display:flex;gap:6px;align-items:center"><span id="flagEmoji">🇲🇦</span><span style="font-size:14px;color:#fff">▼</span></button>
+<span id="dialTxt" style="font-weight:800">+212</span>
+<input id="phoneInp" placeholder="6XX XXX XXX" style="flex:1;background:none;border:0;color:#fff;outline:none;font-size:20px;font-weight:700" inputmode="tel">
+</div>
+<p style="color:#999;font-size:13px;margin-top:10px"><span id="countryName">Morocco</span> • +212 • Brek 3la drapeau bach t-beddel dawla — ga3 dowal kaynin</p>
+<button class="bigBtn lime" id="sendCodeBtn">Next</button>
+<button class="ghostBtn" id="goLoginBtn">I already have an account</button>
+<p id="phoneErr" style="color:#ff6b6b;margin-top:10px"></p>
+</div>
+
+<div class="screen" id="sCountry" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:26px">Choose country</h1><button onclick="show('s2')" style="background:#333;border:0;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button></div>
+<input class="field" id="countrySearch" placeholder="🔍 Search country / code…" style="margin-top:16px">
+<div class="countryList" id="countryList"></div>
+</div></div>
+
+<div class="screen" id="sLogin" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<button onclick="show('s2')" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button>
+<h1 style="font-size:30px;margin:12px 0">I already have an account</h1>
+<input class="field" id="lTel" placeholder="Phone *"><input class="field" id="lPass" type="password" placeholder="Password *">
+<button class="bigBtn lime" id="doLogin">Log in</button><p id="loginMsg"></p>
+</div></div>
+
+<div class="screen" id="s3" style="padding:22px">
+<button onclick="show('s2')" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button>
+<h1 style="font-size:32px;margin-top:14px">Enter the code</h1><p style="color:#bbb;margin:8px 0">We sent your code via Push / WhatsApp to<br><b id="sentTo" style="color:#fff">+212</b></p>
+<div class="card" style="border-color:#b8e62e;text-align:center"><div style="font-size:36px">📲</div><b>Code f tri9 f WhatsApp…</b><div style="font-size:32px;font-weight:900;color:#b8e62e" id="chronoTxt">30</div><p style="color:#999;font-size:13px">WhatsApp t7ell wa7do. Tsennna 30 sec.</p></div>
+<div class="otpDots" id="otpDots"><i></i><i></i><i></i><i></i></div>
+<div class="otpBox"><input maxlength="1" class="otpInp" inputmode="numeric"><input maxlength="1" class="otpInp" inputmode="numeric"><input maxlength="1" class="otpInp" inputmode="numeric"><input maxlength="1" class="otpInp" inputmode="numeric"></div>
+<div class="card" id="demoBox" style="border-color:#b8e62e;display:none"><b>Code dyalek (demo, ba3d 30s): <span id="demoCode" style="font-size:24px;color:#b8e62e">----</span></b><br><small style="color:#999">F l-7qiqa code kay-wsel f WhatsApp li 7ellina lik.</small><br><button class="pillBtn" id="waCodeBtn" style="margin-top:10px">📲 Chouf code f WhatsApp</button></div>
+<button class="ghostBtn" id="resendBtn" disabled>Resend code 00:30</button>
+<button class="bigBtn lime" id="verifyBtn">Verify code →</button>
+<p id="otpErr" style="color:#ff6b6b;margin-top:10px"></p>
+</div>
+
+<!-- LOADING CAR - MAX 3 SEC + BOUTON CONTINUE -->
+<div class="screen" id="sLoad" style="display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px">
+<div class="logoBig"><span class="logoBox">iD</span> inDrive</div>
+<div class="circleLoad"><span class="car">🚗</span></div>
+<h2>Loading your map…</h2><p style="color:#999">Kan-qellebo 3la blastek…</p>
+<p style="color:#b8e62e;margin-top:12px" id="loadStep">1/3 • GPS…</p>
+<button class="bigBtn lime" id="loadContinueBtn" style="max-width:320px">Continue → Ma t-tsennach</button>
+<p style="color:#666;font-size:12px;margin-top:10px">Ghadi y-mchi wa7do f 3 sec, wla brek Continue</p>
+</div>
+
+<div class="screen" id="sReg" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<button onclick="show('s3')" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button>
+<h1 style="font-size:30px;margin-top:10px">Personal information</h1><p style="color:#999">Step <span id="regStepN">1</span> of 3 • <span id="regTelShow"></span></p>
+<div style="height:6px;background:#333;border-radius:99px;overflow:hidden;margin:14px 0"><i id="regBar" style="display:block;height:100%;width:33%;background:#b8e62e"></i></div>
+<div id="r1"><label style="display:grid;place-items:center;width:110px;height:110px;border-radius:22px;background:#2b2b2b;font-size:36px;cursor:pointer;overflow:hidden" id="photoBox">+<input type="file" id="photoInp" accept="image/*" hidden></label>
+<input class="field" id="fFirst" placeholder="First name *"><input class="field" id="fSurname" placeholder="Surname *"><input class="field" id="fDob" type="date"><button class="bigBtn lime" id="rNext1">Next →</button></div>
+<div id="r2" style="display:none"><select class="field" id="fRole"><option value="passager">Passenger — I want a ride</option><option value="conducteur">Driver — City driver</option></select><select class="field" id="fSex"><option>Homme</option><option>Femme</option></select>
+<div id="drvF" style="display:none"><select class="field" id="fVeh"><option>Car</option><option>Motorcycle</option></select><input class="field" id="fModel" placeholder="Car model — Dacia Logan"><select class="field" id="fColor"><option>White</option><option>Black</option><option>Grey</option><option>Red</option><option>Blue</option></select><input class="field" id="fPlate" placeholder="Plate — 12345 - A - 6"><select class="field" id="fSeats"><option>1</option><option>2</option><option selected>3</option><option>4</option></select></div>
+<input class="field" id="fPass" type="password" placeholder="Password *"><button class="bigBtn lime" id="rNext2">Next →</button></div>
+<div id="r3" style="display:none"><div class="card"><b>Check — infos 7qiqiyin?</b><p id="sumTxt" style="color:#bbb;margin-top:8px"></p></div><label style="display:block;margin:14px 0"><input type="checkbox" id="agree"> I agree — infos dyali 7qiqiyin</label><button class="bigBtn lime" id="rFinish">Save & Continue →</button></div>
+</div></div>
+
+<div class="screen" id="sChoose" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center"><button onclick="openMap()" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button><button onclick="show('s2')" style="background:none;border:0;color:#999;cursor:pointer">Close</button><span style="color:#4da3ff">Help</span></div>
+<h1 style="font-size:30px;margin-top:14px">What do you drive?</h1><p style="color:#999">Khtar, 3ad 3ammer documents dyalek b7al tsawer.</p>
+<div class="chooseVeh">
+<button id="chooseCar">🚗<br>Car<br><small style="color:#999">4 seats</small></button>
+<button id="chooseMoto">🏍<br>Motor<br><small style="color:#999">1 seat</small></button>
+</div>
+<div class="card" id="chooseProfileCard" style="display:none">
+<b>Your profile — cadre dyal infos + photo</b>
+<label style="display:grid;place-items:center;width:110px;height:110px;border-radius:22px;background:#2b2b2b;font-size:36px;cursor:pointer;overflow:hidden;margin:12px 0" id="drvPhotoBox">+<input type="file" id="drvPhotoInp" accept="image/*" capture="user" hidden></label>
+<div style="display:flex;gap:8px"><button class="pillBtn" id="takePhotoBtn">📷 Take photo</button><button class="ghostPill" id="galleryBtn">🖼 Gallery</button></div>
+<input class="field" id="drvName" placeholder="First name + Surname *" style="margin-top:12px"><input class="field" id="drvTelShow" placeholder="Phone" disabled>
+<button class="bigBtn lime" id="goDoc2">Next → Driver license (2 of 3)</button>
+</div>
+<button class="ghostBtn" onclick="openMap()">← Passenger mode</button>
+</div></div>
+
+<div class="screen" id="sDoc2" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<div style="display:flex;justify-content:space-between"><button onclick="show('sChoose')" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button><span>Close</span><span style="color:#4da3ff">Help</span></div>
+<h1 style="font-size:32px;margin-top:14px">Driver license</h1>
+<div class="docGrid" style="grid-template-columns:1fr 1fr">
+<label class="docBox" id="licFrontBox">+<input type="file" id="licFrontInp" accept="image/*" hidden></label>
+<label class="docBox" id="licBackBox">+<input type="file" id="licBackInp" accept="image/*" hidden></label>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><span class="docLbl">Driver license</span><span class="docLbl">Back side of license</span></div>
+<input class="field" id="licNum" placeholder="Driver license number *" style="margin-top:14px"><input class="field" id="licExp" type="date">
+<div class="stepFoot"><span style="flex:1"><b>2 of 3</b><br><span style="display:block;height:6px;background:#333;border-radius:99px;overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:66%;background:#b8e62e"></i></span></span><button class="back" onclick="show('sChoose')">‹</button><button class="next" id="doc2Next">Next ›</button></div>
+<p id="doc2Err" style="color:#ff6b6b;margin-top:8px"></p>
+</div></div>
+
+<div class="screen" id="sDoc3" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<div style="display:flex;justify-content:space-between"><button onclick="show('sDoc2')" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button><span>Close</span><span style="color:#4da3ff">Help</span></div>
+<h1 style="font-size:32px;margin-top:14px">Vehicle information</h1>
+<div class="docGrid">
+<label class="docBox" id="vehPicBox">+<input type="file" id="vehPicInp" accept="image/*" hidden></label>
+<label class="docBox" id="vehRegBox">+<input type="file" id="vehRegInp" accept="image/*" hidden></label>
+<label class="docBox" id="vehCertBox">+<span class="opt">Optional</span><input type="file" id="vehCertInp" accept="image/*" hidden></label>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px"><span class="docLbl">Vehicle picture</span><span class="docLbl">Vehicle registration…</span><span class="docLbl">Back side of vehicle certificate</span></div>
+<input class="field" id="vehBrand" placeholder="Vehicle brand *" style="margin-top:14px"><input class="field" id="vehModel" placeholder="Vehicle model *"><input class="field" id="vehColor" placeholder="Vehicle color *"><input class="field" id="vehPlate" placeholder="Plate number *"><input class="field" id="vehYear" type="number" placeholder="Production year *">
+<div class="stepFoot"><span style="flex:1"><b>3 of 3</b><br><span style="display:block;height:6px;background:#333;border-radius:99px;overflow:hidden;margin-top:6px"><i style="display:block;height:100%;width:100%;background:#b8e62e"></i></span></span><button class="back" onclick="show('sDoc2')">‹</button><button class="next" id="doc3Next">Next ›</button></div>
+<p id="doc3Err" style="color:#ff6b6b;margin-top:8px"></p>
+</div></div>
+
+<div class="screen" id="sVerify" style="padding:22px"><div style="max-width:520px;margin:0 auto">
+<div style="text-align:end;color:#999">Close</div>
+<h1 style="font-size:32px;margin-top:10px" id="verifyTitle">We're verifying your documents</h1>
+<div class="timeline">
+<div class="tl done"><span class="dot">✓</span><div><b>Documents uploaded</b><br><span style="color:#999">Thanks for joining inDrive</span></div></div>
+<div class="tl"><span class="dot" style="background:#b8e62e;color:#111">🕐</span><div><b>Wait for verification</b><br><span style="color:#999">We'll send you a message within 12 hours</span></div></div>
+<div class="tl dim" id="tl3"><span class="dot">🚗</span><div><b>Verification complete</b><br><span>Your account will be activated automatically</span></div></div>
+</div>
+<div id="verifyResult"></div>
+<b>Other documents you can upload:</b>
+<button class="ghostBtn" style="text-align:start" onclick="toast('Criminal record','Upload photo — optional')">📄 Criminal record (optional) ›</button>
+<button class="ghostBtn" style="text-align:start" onclick="toast('Taxi License','Upload photo — optional')">📄 Professional Taxi License (optional) ›</button>
+<button class="ghostBtn" style="text-align:start" onclick="toast('Self-employment','Upload photo — optional')">📄 Certificate of self-employment (optional) ›</button>
+<button class="bigBtn lime" id="verifyOkBtn">OK</button>
+<button class="ghostBtn" id="verifyFixBtn" style="display:none">← Fix missing documents</button>
+</div></div>
+
+<div class="screen" id="sMap" style="position:relative;overflow:hidden">
+<div id="map"></div>
+<div class="top"><button class="iconBtn" id="burgerBtn">☰</button><button class="iconBtn" id="gpsBtn" style="font-size:18px">➤</button></div>
+<div class="pickup"><small>Pickup point</small><br><span id="pickupTxt">Searching location…</span></div>
+<div class="sheet">
+<div class="tabs"><button class="tab on" data-v="Ride" data-p="19">🚗 Ride<br><small>4 • 2 min</small></button><button class="tab" data-v="Moto" data-p="10">🏍 Moto<br><small>1 • 2 min</small></button><button class="tab" data-v="Comfort" data-p="26">🚗 Comfort<br><small>4 • 2 min</small></button></div>
+<button class="field" id="routeBtn" style="text-align:start;margin-top:12px">🔍 &nbsp; Where to &amp; for how much?</button>
+<button class="ghostBtn" style="margin-top:0;text-align:start" data-to="Cmc drarga">🕐 Cmc drarga — Rue Drarga, Agadir</button>
+<button class="ghostBtn" style="text-align:start" data-to="Avenue Bir Anzaran">🕐 Avenue Bir Anzaran</button>
+<div id="fareBox" style="display:none">
+<div style="display:flex;justify-content:space-between;margin-top:12px"><b id="fareTitle">Ride • 4 • 2 min</b><span style="color:#999">Affordable</span></div>
+<div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0"><button id="minusBtn" style="width:56px;height:56px;border-radius:50%;border:0;background:#333;color:#fff;font-size:28px;cursor:pointer">−</button><div style="text-align:center"><div style="font-size:34px;font-weight:900">DH <span id="priceTxt">19</span></div><small style="color:#999">Recommended: DH <span id="recTxt">20</span></small></div><button id="plusBtn" style="width:56px;height:56px;border-radius:50%;border:0;background:#333;color:#fff;font-size:28px;cursor:pointer">+</button></div>
+<p style="color:#999;font-size:13px" id="distTxt">— km • — min</p>
+<label style="display:flex;justify-content:space-between;align-items:center">Auto-accept DH <span id="autoTxt">19</span> <button class="toggle" id="autoT"></button></label>
+<button class="bigBtn lime" id="findBtn">Find drivers</button></div>
+<div id="offersBox"></div>
+</div></div>
+
+<div class="screen" id="sRoute" style="padding:20px"><div style="max-width:520px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:24px">Enter your route</h1><button onclick="openMap()" style="background:#333;border:0;color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer">✕</button></div>
+<input class="field" id="fromInput" placeholder="From — GPS" style="margin-top:18px"><input class="field" id="toInput" placeholder="To — CMC Drarga">
+<button class="ghostBtn" style="text-align:start" data-to2="Cmc drarga">Cmc drarga — Rue Drarga</button>
+<button class="ghostBtn" style="text-align:start" data-to2="Aourir">Aourir — Centre</button>
+<button class="bigBtn lime" id="confirmRoute">Confirm route →</button>
+</div></div>
+
+<div class="screen" id="sDrv" style="padding:20px"><div style="max-width:560px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center"><button onclick="openMap()" style="background:none;border:0;color:#fff;font-size:24px;cursor:pointer">←</button><b>Driver — CMC Clients</b><button class="pillBtn" id="onlineBtn" style="flex:0 0 auto">● Online</button></div>
+<div id="drvCard"></div>
+<div style="display:flex;gap:8px;margin-top:10px"><button class="ghostPill" id="refreshBtn">↻ Refresh requests</button></div>
+<div id="reqList"></div><p id="noReq" style="color:#999;margin-top:10px">No requests…</p>
+<button class="ghostBtn" onclick="demoClient()">+ Demo client</button>
+<button class="ghostBtn" onclick="openMap()" style="background:#b8e62e;color:#111;font-weight:800">👤 Passenger mode — ana client</button>
+</div></div>
+
+<div class="screen" id="sProfile" style="padding:20px"><div style="max-width:520px;margin:0 auto">
+<div style="display:flex;justify-content:space-between;align-items:center"><button class="iconBtn" onclick="openSidebar()" style="position:static">☰</button><b id="profNameTop">—</b><div class="ava" id="profAva">?</div></div>
+<div class="card"><h2 style="font-size:26px">How do you want to get income with us?</h2>
+<button class="incomeRow" data-inc="City driver"><span class="ic">🚗</span><span><b>City driver</b><br><small style="color:#999">Drive passengers around the city</small></span><span style="margin-left:auto">›</span></button>
+<button class="incomeRow" data-inc="Courier"><span class="ic">📦</span><span><b>Courier</b><br><small style="color:#999">Deliver packages up to 20kg</small></span><span style="margin-left:auto">›</span></button>
+<button class="incomeRow" data-inc="City to City"><span class="ic">🗺</span><span><b>City to City driver</b><br><small style="color:#999">Transport passengers between cities</small></span><span style="margin-left:auto">›</span></button>
+<button class="incomeRow" data-inc="Freight"><span class="ic">🚚</span><span><b>Freight driver</b><br><small style="color:#999">Deliver cargoes over 20kg</small></span><span style="margin-left:auto">›</span></button></div>
+<div class="card" style="display:flex;justify-content:space-between;align-items:center"><span><b>Agadir (اكادير)</b><br><small style="color:#999">Change the city</small></span><span style="width:44px;height:44px;border-radius:50%;background:#b8e62e;display:grid;place-items:center;font-size:22px">◎</span></div>
+<div class="card" style="text-align:center"><div class="ava" id="profAva2" style="margin:0 auto;width:84px;height:84px;font-size:32px">?</div><h2 id="profName2" style="margin-top:8px">—</h2><p style="color:#fbbf24">★★★★★ 5,0 (6)</p><p id="profTel" style="color:#999"></p><p id="profCar" style="color:#999"></p><p id="profDocs" style="color:#4ade80"></p></div>
+<button class="bigBtn" id="logoutBtn" style="background:#fff;color:#111">Log out</button>
+<button class="ghostBtn" onclick="openMap()">← Back to map</button>
+</div></div>
+
+<div class="screen" id="sSet" style="padding:20px"><div style="max-width:520px;margin:0 auto">
+<button class="iconBtn" onclick="openSidebar()" style="position:static">☰</button>
+<h1 style="font-size:34px;margin:14px 0">App settings</h1>
+<div class="card">
+<button class="setRow"><span>🌙 Appearance<small>System default</small></span><span>›</span></button>
+<button class="setRow"><span>📏 Distance units<small>Kilometres</small></span><span>›</span></button>
+<button class="setRow" id="langRow"><span>🌐 Language<small id="langVal">English</small></span><span>›</span></button>
+<button class="setRow"><span>◎ Show location to your driver<small id="showLocVal">On</small></span><button class="toggle on" id="showLocT"></button></button>
+<button class="setRow" id="callsRow"><span>📞 In-app calls<small>Chat only — no phone call</small></span><span>›</span></button>
+<button class="setRow" id="docsRow"><span>📄 My documents<small id="docsVal">Not verified yet</small></span><span>›</span></button>
+</div>
+<div class="card"><button class="setRow"><span>📄 Legal documents</span><span>›</span></button><button class="setRow"><span>📱 App version<small>5.191.0</small></span><span>›</span></button></div>
+<button class="ghostBtn" id="delAcc" style="color:#ff6b6b">🗑 Delete my account</button>
+<div style="background:#2e2a8f;border-radius:16px;padding:16px;margin-top:14px"><b>Some settings moved to make things simpler. Tap to find</b><br><button class="pillBtn" style="margin-top:10px" onclick="toast('Help','Support — WhatsApp, wla chat m3a conducteur.')">Help</button></div>
+<button class="ghostBtn" onclick="openMap()">👤 Passenger mode</button>
+<button class="ghostBtn" onclick="goDriverFlow()">🚗 Driver mode</button>
+</div></div>
+
+<div class="screen" id="sChat" style="padding:20px"><div style="max-width:560px;margin:0 auto">
+<div style="display:flex;gap:12px;align-items:center"><button id="chatBack" style="background:none;border:0;color:#fff;font-size:26px;cursor:pointer">←</button><div class="ava" id="chatAva">D</div><div style="flex:1"><b id="chatName">Driver</b><br><small style="color:#4ade80">● Active now • Chat only</small></div><button class="ghostPill" id="chatSos" style="flex:0 0 auto;background:#dc2626;border:0">SOS</button></div>
+<div id="chatTrip"></div><div class="chatBox" id="chatMsgs"></div>
+<div style="display:flex;gap:8px;margin-top:10px"><input class="field" id="chatInp" placeholder="Write a message…" style="margin:0"><button class="pillBtn" id="chatSend" style="flex:0 0 56px">➤</button></div>
+<div style="display:flex;gap:8px;margin-top:10px"><button class="ghostPill" id="arrivedBtn">I've arrived</button><button class="pillBtn" id="completeBtn">Complete ride ★</button></div>
+<p style="color:#999;font-size:12px;margin-top:8px">No phone call. Chat hna, tfahmo 3la point.</p>
+</div></div>
+
+<!-- SIDEBAR KAMEL - MA T7EYYEDCH -->
+<div class="overlay" id="overlay"></div>
+<aside id="sidebar">
+<button class="profileHead" id="profileHeadBtn"><div class="ava" id="sideAva">?</div><div style="flex:1"><b id="sideName" style="font-size:20px">—</b><br><span style="color:#fbbf24">★★★★★ 5,0 (6)</span></div><span style="font-size:28px">›</span></button>
+<button class="menuBtn" data-m="city">🚗 City</button>
+<button class="menuBtn" data-m="history">🕐 Request history</button>
+<button class="menuBtn" data-m="couriers">📦 Couriers</button>
+<button class="menuBtn" data-m="city2city">🌍 City to City</button>
+<button class="menuBtn" data-m="saved">🔖 Saved places</button>
+<button class="menuBtn" data-m="freight">🚚 Freight</button>
+<button class="menuBtn" data-m="notif">🔔 Notifications</button>
+<button class="menuBtn" data-m="safety">🛡 Safety</button>
+<button class="menuBtn" data-m="settings">⚙ Settings</button>
+<button class="menuBtn" data-m="help">ⓘ Help</button>
+<div style="padding:18px">
+<button class="bigBtn lime" id="driverModeBtn" style="margin-top:0">Driver mode</button>
+<div style="display:flex;gap:20px;justify-content:center;margin-top:18px;font-size:24px" class="socialRow">
+<a href="https://www.tiktok.com" target="_blank" aria-label="TikTok">♪</a>
+<a href="https://wa.me/" target="_blank" aria-label="WhatsApp">💬</a>
+<a href="https://www.facebook.com" target="_blank" aria-label="Facebook">f</a>
+<a href="https://www.instagram.com" target="_blank" aria-label="Instagram">◎</a>
+</div>
+<p style="text-align:center;color:#777;font-size:12px;margin-top:12px">TikTok • WhatsApp • Facebook • Instagram</p>
+</div>
+</aside>
+
+<div class="notif" id="locNotif"><div class="box"><div style="font-size:48px">📍</div><h2 id="notifTitle">Location is off</h2><p style="color:#bbb;margin:10px 0" id="notifTxt">Khassek t-activi Location + Wifi / 4G.</p><p style="text-align:start;font-size:14px;color:#bbb">1. Activi Location<br>2. Activi Wifi / 4G<br>3. Brek Allow<br>4. Brek Retry</p><button class="bigBtn lime" id="retryLoc">↻ Retry</button><button class="ghostBtn" id="closeNotif">Fermer</button></div></div>
+<div class="notif" id="toastN"><div class="box"><h2 id="toastT">Done</h2><p id="toastX" style="color:#bbb"></p><button class="bigBtn lime" onclick="document.getElementById('toastN').classList.remove('show')">OK</button></div></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const SUPABASE_URL="HET_URL_DYALEK"; const SUPABASE_KEY="HET_KEY_DYALEK";
+let sb=null; try{ if(window.supabase && SUPABASE_URL.indexOf("HET_")!==0) sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }catch(e){}
+const CMC=[30.3835,-9.4820];
+const COUNTRIES=[["🇲🇦","Morocco","+212"],["🇬🇷","Greece","+30"],["🇫🇷","France","+33"],["🇪🇸","Spain","+34"],["🇮🇹","Italy","+39"],["🇩🇪","Germany","+49"],["🇬🇧","United Kingdom","+44"],["🇺🇸","United States","+1"],["🇨🇦","Canada","+1"],["🇧🇪","Belgium","+32"],["🇳🇱","Netherlands","+31"],["🇨🇭","Switzerland","+41"],["🇵🇹","Portugal","+351"],["🇹🇷","Turkey","+90"],["🇸🇦","Saudi Arabia","+966"],["🇦🇪","UAE","+971"],["🇶🇦","Qatar","+974"],["🇪🇬","Egypt","+20"],["🇹🇳","Tunisia","+216"],["🇩🇿","Algeria","+213"],["🇱🇾","Libya","+218"],["🇲🇷","Mauritania","+222"],["🇸🇳","Senegal","+221"],["🇨🇮","Ivory Coast","+225"],["🇳🇬","Nigeria","+234"],["🇿🇦","South Africa","+27"],["🇮🇳","India","+91"],["🇵🇰","Pakistan","+92"],["🇧🇩","Bangladesh","+880"],["🇮🇩","Indonesia","+62"],["🇲🇾","Malaysia","+60"],["🇵🇭","Philippines","+63"],["🇯🇵","Japan","+81"],["🇰🇷","South Korea","+82"],["🇨🇳","China","+86"],["🇷🇺","Russia","+7"],["🇺🇦","Ukraine","+380"],["🇵🇱","Poland","+48"],["🇷🇴","Romania","+40"],["🇸🇪","Sweden","+46"],["🇳🇴","Norway","+47"],["🇩🇰","Denmark","+45"],["🇫🇮","Finland","+358"],["🇦🇹","Austria","+43"],["🇮🇪","Ireland","+353"],["🇧🇷","Brazil","+55"],["🇲🇽","Mexico","+52"],["🇦🇷","Argentina","+54"],["🇨🇱","Chile","+56"],["🇦🇺","Australia","+61"]];
+let dial="+212", flag="🇲🇦", countryName="Morocco", photoData="", drvPhoto="", docPhotos={}, otpCode="", phoneFull="", chronoTimer=null, map=null, fromPos=null, fromName="", toName="Cmc drarga", vehicle="Ride", price=19, recPrice=20, lastDist=0, currentReqId=null, chatWith=null, chatRoom=null, online=true, myMarker=null, routeLine=null, chosenVeh="Car", verified=false, splashDone=false, loadDone=false, loadTimer=null;
+const bc=new BroadcastChannel("indrive_cmc_v10");
+function show(id){var els=document.querySelectorAll(".screen"); els.forEach(function(s){s.classList.remove("on"); s.style.display="none";}); var el=document.getElementById(id); if(!el){alert("Page "+id+" ma lqithach");return;} el.classList.add("on"); el.style.display=(id==="sLoad"||id==="splash"||id==="s1")?"flex":"block"; window.scrollTo(0,0);}
+/* FIX LOADING 1 : SPLASH */
+function goS1(){if(splashDone)return; splashDone=true; clearInterval(si); show("s1");}
+window.goS1=goS1;
+function toast(t,x){document.getElementById("toastT").textContent=t;document.getElementById("toastX").textContent=x||"";document.getElementById("toastN").classList.add("show");}
+function cur(){try{return JSON.parse(localStorage.getItem("id10_current")||"null");}catch(e){return null;}}
+function users(){try{return JSON.parse(localStorage.getItem("id10_users")||"[]");}catch(e){return[];}}
+function getReqs(){try{return JSON.parse(localStorage.getItem("id10_reqs")||"[]");}catch(e){return[];}} function saveReqs(r){localStorage.setItem("id10_reqs",JSON.stringify(r));bc.postMessage({type:"reqs"});}
+function getOffers(){try{return JSON.parse(localStorage.getItem("id10_offers")||"[]");}catch(e){return[];}} function saveOffers(o){localStorage.setItem("id10_offers",JSON.stringify(o));bc.postMessage({type:"offers"});}
+async function dbIns(t,row){if(sb){try{const r=await sb.from(t).insert(row).select().single();if(!r.error)return r.data;}catch(e){}}return null;}
+async function dbList(t){if(sb){try{const r=await sb.from(t).select("*").order("created_at",{ascending:false}).limit(40);if(!r.error)return r.data||[];}catch(e){}}return null;}
+function km(a,b){const R=6371,dLa=(b[0]-a[0])*Math.PI/180,dLn=(b[1]-a[1])*Math.PI/180,h=Math.sin(dLa/2)**2+Math.cos(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.sin(dLn/2)**2;return 2*R*Math.asin(Math.sqrt(h));}
+let sLeft=5; var si=setInterval(function(){sLeft--; var e=document.getElementById("splashTxt"); if(e)e.textContent="Loading… "+Math.max(0,sLeft)+" seconds — brek hna bach t-mchi daba"; if(sLeft<=0)goS1();},1000);
+setTimeout(goS1,5500);
+document.getElementById("c1").onclick=function(){show("s2");};
+function renderCountries(q){document.getElementById("countryList").innerHTML=COUNTRIES.filter(function(c){return (c[1]+" "+c[2]).toLowerCase().indexOf((q||"").toLowerCase())>-1;}).map(function(c){return "<button data-d='"+c[2]+"' data-f='"+c[0]+"' data-n='"+c[1]+"'><span style='font-size:24px'>"+c[0]+"</span><span style='flex:1'>"+c[1]+"</span><b>"+c[2]+"</b></button>";}).join("");
+document.querySelectorAll("#countryList button").forEach(function(b){b.onclick=function(){dial=b.dataset.d;flag=b.dataset.f;countryName=b.dataset.n;document.getElementById("flagEmoji").textContent=flag;document.getElementById("dialTxt").textContent=dial;document.getElementById("countryName").textContent=countryName;show("s2");};});}
+document.getElementById("flagBtn").onclick=function(){renderCountries("");show("sCountry");};
+document.getElementById("countrySearch").oninput=function(e){renderCountries(e.target.value);};
+document.getElementById("goLoginBtn").onclick=function(){show("sLogin");};
+document.getElementById("doLogin").onclick=function(){const tel=document.getElementById("lTel").value.trim(),p=document.getElementById("lPass").value; let u=users().find(function(x){return x.tel===tel&&x.pass===p;}); if(!u){document.getElementById("loginMsg").textContent="Phone or password wrong";return;} localStorage.setItem("id10_current",JSON.stringify(u)); updateSidebar(); if(u.verified)renderDriver(); else openMap();};
+document.getElementById("sendCodeBtn").onclick=function(){
+ let p=document.getElementById("phoneInp").value.replace(/\D/g,""); const dc=dial.replace("+",""); if(p.indexOf(dc)===0)p=p.slice(dc.length); if(p.charAt(0)==="0")p=p.slice(1);
+ if(p.length<8){document.getElementById("phoneErr").textContent="Dkhel numero 7qiqi f "+countryName;return;}
+ phoneFull=dial+p; otpCode=String(Math.floor(1000+Math.random()*9000));
+ document.getElementById("sentTo").textContent=phoneFull; document.getElementById("demoBox").style.display="none"; show("s3");
+ window.open("https://wa.me/"+dc+p+"?text="+encodeURIComponent("inDrive CMC — Your verification code is: "+otpCode+". Dkhlo f site."),"_blank");
+ let n=30; document.getElementById("chronoTxt").textContent=n; document.getElementById("resendBtn").disabled=true; clearInterval(chronoTimer);
+ chronoTimer=setInterval(function(){n--; document.getElementById("chronoTxt").textContent=n; document.getElementById("resendBtn").textContent="Resend code 00:"+String(Math.max(0,n)).padStart(2,"0");
+  if(n<=0){clearInterval(chronoTimer); document.getElementById("chronoTxt").textContent="✓ Code wsel!"; document.getElementById("demoCode").textContent=otpCode; document.getElementById("demoBox").style.display="block"; document.getElementById("resendBtn").disabled=false; document.getElementById("resendBtn").textContent="Resend code";}},1000);
+};
+document.getElementById("waCodeBtn").onclick=function(){window.open("https://wa.me/"+phoneFull.replace("+","")+"?text="+encodeURIComponent("inDrive code: "+otpCode),"_blank");};
+document.getElementById("resendBtn").onclick=function(){document.getElementById("sendCodeBtn").onclick();};
+document.querySelectorAll(".otpInp").forEach(function(inp,i,arr){inp.oninput=function(){inp.value=inp.value.replace(/\D/g,""); document.querySelectorAll("#otpDots i").forEach(function(d,j){d.classList.toggle("fill",j<=i&&!!inp.value);}); if(inp.value&&arr[i+1])arr[i+1].focus();}; inp.onkeydown=function(e){if(e.key==="Backspace"&&!inp.value&&arr[i-1])arr[i-1].focus();};});
+/* FIX LOADING 2 : CAR LOADING - KAY-MCHI WA7DO F 3 SEC, WLA B BOUTON */
+function finishLoading(){
+ if(loadDone)return; loadDone=true; clearTimeout(loadTimer);
+ document.getElementById("regTelShow").textContent=phoneFull;
+ var old=null; try{old=users().find(function(x){return x.tel===phoneFull;});}catch(e){}
+ if(old){localStorage.setItem("id10_current",JSON.stringify(old)); updateSidebar(); openMap();}
+ else show("sReg");
+}
+window.finishLoading=finishLoading;
+document.getElementById("loadContinueBtn").onclick=finishLoading;
+function startLoading(){
+ loadDone=false; show("sLoad");
+ document.getElementById("loadStep").textContent="1/3 • GPS…";
+ setTimeout(function(){var e=document.getElementById("loadStep"); if(e)e.textContent="2/3 • Map…";},800);
+ setTimeout(function(){var e=document.getElementById("loadStep"); if(e)e.textContent="3/3 • Drivers…";},1600);
+ clearTimeout(loadTimer); loadTimer=setTimeout(finishLoading,3000);
+}
+document.getElementById("verifyBtn").onclick=function(){
+ const code=Array.prototype.map.call(document.querySelectorAll(".otpInp"),function(i){return i.value;}).join("");
+ if(code!==otpCode){document.getElementById("otpErr").textContent="Code ghalet wla mazal ma wsel. Tsennna chrono 30s, w chouf WhatsApp / demo: "+otpCode;return;}
+ startLoading();
+};
+function bindPhoto(boxId,inpId,key){document.getElementById(boxId).onclick=function(){document.getElementById(inpId).click();}; document.getElementById(inpId).onchange=function(e){const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=function(){docPhotos[key]=r.result; document.getElementById(boxId).innerHTML='<img src="'+r.result+'">'; if(key==="profile")photoData=r.result; if(key==="drvProfile")drvPhoto=r.result;}; r.readAsDataURL(f);};}
+bindPhoto("photoBox","photoInp","profile"); bindPhoto("drvPhotoBox","drvPhotoInp","drvProfile");
+bindPhoto("licFrontBox","licFrontInp","licFront"); bindPhoto("licBackBox","licBackInp","licBack");
+bindPhoto("vehPicBox","vehPicInp","vehPic"); bindPhoto("vehRegBox","vehRegInp","vehReg"); bindPhoto("vehCertBox","vehCertInp","vehCert");
+document.getElementById("takePhotoBtn").onclick=function(){document.getElementById("drvPhotoInp").click();};
+document.getElementById("galleryBtn").onclick=function(){document.getElementById("drvPhotoInp").click();};
+document.getElementById("fRole").onchange=function(e){document.getElementById("drvF").style.display=e.target.value==="conducteur"?"block":"none";};
+document.getElementById("rNext1").onclick=function(){if(!document.getElementById("fFirst").value.trim()||!document.getElementById("fSurname").value.trim()){alert("First name + Surname");return;} document.getElementById("r1").style.display="none";document.getElementById("r2").style.display="block";document.getElementById("regStepN").textContent="2";document.getElementById("regBar").style.width="66%";};
+document.getElementById("rNext2").onclick=function(){document.getElementById("r2").style.display="none";document.getElementById("r3").style.display="block";document.getElementById("regStepN").textContent="3";document.getElementById("regBar").style.width="100%";document.getElementById("sumTxt").textContent=document.getElementById("fFirst").value+" "+document.getElementById("fSurname").value+" • "+phoneFull+" • "+document.getElementById("fRole").value;};
+document.getElementById("rFinish").onclick=async function(){if(!document.getElementById("agree").checked){alert("Acceptez");return;}
+ const u={role:document.getElementById("fRole").value,prenom:document.getElementById("fFirst").value.trim(),nom:document.getElementById("fSurname").value.trim(),first:document.getElementById("fFirst").value.trim(),surname:document.getElementById("fSurname").value.trim(),dob:document.getElementById("fDob").value,tel:phoneFull,pass:document.getElementById("fPass").value,sexe:document.getElementById("fSex").value,photo:photoData||drvPhoto,vehicle:document.getElementById("fVeh").value,model:document.getElementById("fModel").value.trim(),color:document.getElementById("fColor").value,plate:document.getElementById("fPlate").value.trim(),seats:document.getElementById("fSeats").value,verified:false};
+ let a=users().filter(function(x){return x.tel!==u.tel;}); a.push(u); localStorage.setItem("id10_users",JSON.stringify(a)); localStorage.setItem("id10_current",JSON.stringify(u)); updateSidebar();
+ if(u.role==="conducteur"){document.getElementById("drvName").value=u.prenom+" "+u.nom; document.getElementById("drvTelShow").value=u.tel; show("sChoose");} else openMap();};
+function goDriverFlow(){const u=cur(); if(u){document.getElementById("drvName").value=u.prenom+" "+u.nom; document.getElementById("drvTelShow").value=u.tel;} show("sChoose");}
+window.goDriverFlow=goDriverFlow;
+document.getElementById("chooseCar").onclick=function(){chosenVeh="Car"; this.classList.add("on"); document.getElementById("chooseMoto").classList.remove("on"); document.getElementById("chooseProfileCard").style.display="block";};
+document.getElementById("chooseMoto").onclick=function(){chosenVeh="Motorcycle"; this.classList.add("on"); document.getElementById("chooseCar").classList.remove("on"); document.getElementById("chooseProfileCard").style.display="block";};
+document.getElementById("goDoc2").onclick=function(){if(!document.getElementById("drvName").value.trim()){alert("Smiya required");return;} show("sDoc2");};
+document.getElementById("doc2Next").onclick=function(){const miss=[]; if(!docPhotos.licFront)miss.push("Photo Driver license"); if(!docPhotos.licBack)miss.push("Photo Back side"); if(!document.getElementById("licNum").value.trim())miss.push("Driver license number"); if(!document.getElementById("licExp").value)miss.push("Expiration date"); if(miss.length){document.getElementById("doc2Err").textContent="Naqes: "+miss.join(" • ");return;} show("sDoc3");};
+document.getElementById("doc3Next").onclick=function(){
+ const miss=[]; if(!docPhotos.vehPic)miss.push("Vehicle picture"); if(!docPhotos.vehReg)miss.push("Vehicle registration"); if(!document.getElementById("vehBrand").value.trim())miss.push("Vehicle brand"); if(!document.getElementById("vehModel").value.trim())miss.push("Vehicle model"); if(!document.getElementById("vehColor").value.trim())miss.push("Vehicle color"); if(!document.getElementById("vehPlate").value.trim())miss.push("Plate number"); if(!document.getElementById("vehYear").value)miss.push("Production year");
+ if(miss.length){document.getElementById("doc3Err").textContent="Naqes: "+miss.join(" • ");return;}
+ const u=cur(); if(u){u.vehicle=chosenVeh; u.model=document.getElementById("vehBrand").value+" "+document.getElementById("vehModel").value; u.color=document.getElementById("vehColor").value; u.plate=document.getElementById("vehPlate").value; u.year=document.getElementById("vehYear").value; u.licNum=document.getElementById("licNum").value; u.licExp=document.getElementById("licExp").value; u.photo=drvPhoto||u.photo; localStorage.setItem("id10_current",JSON.stringify(u)); let a=users().filter(function(x){return x.tel!==u.tel;}); a.push(u); localStorage.setItem("id10_users",JSON.stringify(a)); updateSidebar();}
+ show("sVerify"); document.getElementById("verifyResult").innerHTML=""; document.getElementById("verifyFixBtn").style.display="none";
+ setTimeout(function(){
+   const missing=[]; if(!docPhotos.licFront||!docPhotos.licBack)missing.push("Driver license photos"); if(!docPhotos.vehPic||!docPhotos.vehReg)missing.push("Vehicle photos");
+   if(missing.length){document.getElementById("verifyTitle").textContent="Something is wrong with your documents"; document.getElementById("verifyResult").innerHTML="<div class='card' style='border-color:#ef4444'><b style='color:#ef4444'>❌ Not accepted yet</b><p>Naqes: "+missing.join(", ")+".</p></div>"; document.getElementById("verifyFixBtn").style.display="block";}
+   else{verified=true; const uu=cur(); if(uu){uu.verified=true; localStorage.setItem("id10_current",JSON.stringify(uu)); let aa=users().filter(function(x){return x.tel!==uu.tel;}); aa.push(uu); localStorage.setItem("id10_users",JSON.stringify(aa));} document.getElementById("tl3").classList.remove("dim"); document.getElementById("verifyTitle").textContent="Thanks for joining inDrive"; document.getElementById("verifyResult").innerHTML="<div class='card' style='border-color:#b8e62e'><b style='color:#b8e62e'>✅ ACCEPTED — Verification complete</b><p>Documents dyalek tqeblo. Daba t-qder t-chouf clients.</p></div>"; document.getElementById("verifyOkBtn").textContent="OK — Go to clients →"; }
+ },6000);
+};
+document.getElementById("verifyFixBtn").onclick=function(){show("sDoc2");};
+document.getElementById("verifyOkBtn").onclick=function(){if(verified)renderDriver(); else toast("Wait for verification","Mazal kan-verifiw.");};
+function openSidebar(){updateSidebar();document.getElementById("sidebar").classList.add("open");document.getElementById("overlay").classList.add("show");}
+function closeSidebar(){document.getElementById("sidebar").classList.remove("open");document.getElementById("overlay").classList.remove("show");}
+document.getElementById("burgerBtn").onclick=openSidebar;
+document.getElementById("overlay").onclick=closeSidebar;
+function updateSidebar(){const u=cur(); const n=u?(u.prenom+" "+u.nom):"Fatema"; const ini=n.charAt(0).toUpperCase(); document.getElementById("sideName").textContent=n; document.getElementById("sideAva").innerHTML=u&&u.photo?'<img src="'+u.photo+'">':ini; document.getElementById("profNameTop").textContent=n; document.getElementById("profName2").textContent=n; document.getElementById("profTel").textContent=u?u.tel:""; document.getElementById("profCar").textContent=u&&u.model?u.vehicle+" "+u.model+" • "+u.plate:""; document.getElementById("profDocs").textContent=u&&u.verified?"✅ Documents verified":"⏳ Documents not verified yet"; document.getElementById("profAva").innerHTML=u&&u.photo?'<img src="'+u.photo+'">':ini; document.getElementById("profAva2").innerHTML=u&&u.photo?'<img src="'+u.photo+'">':ini; document.getElementById("docsVal").textContent=u&&u.verified?"Verified ✅":"Not verified yet";}
+document.getElementById("profileHeadBtn").onclick=function(){closeSidebar(); updateSidebar(); show("sProfile");};
+document.querySelectorAll("[data-m]").forEach(function(b){b.onclick=function(){closeSidebar(); const m=b.dataset.m;
+ if(m==="city")openMap(); else if(m==="settings")show("sSet");
+ else if(m==="history"){const u=cur(); const l=getReqs().filter(function(r){return r.tel===(u&&u.tel);}); toast("Request history",l.length?l.map(function(r){return r.from_name+" → "+r.to_name+" • "+r.offer+" DH";}).join(" | "):"No trips yet.");}
+ else if(m==="saved")toast("Saved places","Cmc drarga — Rue Drarga, Agadir • Aourir • Inezgane");
+ else if(m==="safety")toast("Safety","SOS + Share trip + Verified driver. Chat only, no call.");
+ else if(m==="notif")toast("Notifications","Offers + requests kay-wslo hna.");
+ else if(m==="help")toast("Help","Support — WhatsApp wla chat m3a conducteur.");
+ else toast(b.textContent.trim(),"Had service ghadi y-tzad. City + Driver khdamin daba.");
+};});
+document.getElementById("driverModeBtn").onclick=function(){closeSidebar(); goDriverFlow();};
+document.querySelectorAll("[data-inc]").forEach(function(b){b.onclick=function(){toast(b.dataset.inc,"Kammel documents."); goDriverFlow();};});
+document.getElementById("logoutBtn").onclick=function(){if(confirm("Log out?")){localStorage.removeItem("id10_current"); show("s1");}};
+document.getElementById("langRow").onclick=function(){const l=prompt("Language: fr / en / ar","en"); if(l){document.getElementById("langVal").textContent=l==="fr"?"Français":l==="ar"?"العربية":"English"; document.documentElement.dir=l==="ar"?"rtl":"ltr";}};
+document.getElementById("showLocT").onclick=function(){this.classList.toggle("on");document.getElementById("showLocVal").textContent=this.classList.contains("on")?"On":"Off";};
+document.getElementById("callsRow").onclick=function(){toast("In-app calls","Chat only.");};
+document.getElementById("docsRow").onclick=function(){const u=cur(); if(u&&u.verified)toast("Documents","✅ Verified"); else goDriverFlow();};
+document.getElementById("delAcc").onclick=function(){if(confirm("Delete account?")){localStorage.removeItem("id10_current"); show("s1");}};
+function openMap(){show("sMap"); initMap();}
+function initMap(){ if(typeof L==="undefined"){document.getElementById("locNotif").classList.add("show");return;}
+ if(!map){map=L.map("map",{zoomControl:false}).setView([30.42,-9.58],14); L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",{maxZoom:19,attribution:"© OSM © CARTO"}).addTo(map); L.marker(CMC).addTo(map).bindPopup("<b>Cmc drarga</b>").openPopup(); map.on("click",function(e){setFrom([e.latlng.lat,e.latlng.lng],"Point on map");});}
+ [150,400,900].forEach(function(ms){setTimeout(function(){try{map.invalidateSize();}catch(e){}},ms);}); checkLoc(); }
+function checkLoc(){ if(!navigator.onLine){document.getElementById("locNotif").classList.add("show");return;}
+ navigator.geolocation.getCurrentPosition(function(p){document.getElementById("locNotif").classList.remove("show"); setFrom([p.coords.latitude,p.coords.longitude],"Your location — GPS");},
+ function(e){document.getElementById("notifTxt").textContent=e.code===1?"Location BLOCKED. Settings > Location > Allow, 3ad Retry.":"GPS ma lqach blastek. Activi Wifi + Location.";document.getElementById("locNotif").classList.add("show");},{timeout:8000,enableHighAccuracy:true});}
+document.getElementById("retryLoc").onclick=function(){checkLoc();};
+document.getElementById("closeNotif").onclick=function(){document.getElementById("locNotif").classList.remove("show");};
+document.getElementById("gpsBtn").onclick=function(){checkLoc();};
+function setFrom(pos,name){fromPos=pos;fromName=name;document.getElementById("pickupTxt").textContent=name;document.getElementById("fromInput").value=name;
+ if(map){try{map.setView(pos,15); if(myMarker)map.removeLayer(myMarker); myMarker=L.marker(pos).addTo(map).bindPopup("<b>Pickup</b>").openPopup(); if(routeLine)map.removeLayer(routeLine); routeLine=L.polyline([pos,CMC],{color:"#b8e62e",weight:4}).addTo(map);}catch(e){}}
+ lastDist=km(pos,CMC); const mins=Math.max(2,Math.round(lastDist*2.2+3)); document.getElementById("distTxt").textContent=lastDist.toFixed(1)+" km • ~"+mins+" min to "+toName;
+ recPrice=Math.max(12,Math.round(8+lastDist*1.1)); price=vehicle==="Moto"?Math.max(8,Math.round(recPrice*0.55)):vehicle==="Comfort"?recPrice+7:recPrice-1; updPrice();}
+function updPrice(){document.getElementById("priceTxt").textContent=price;document.getElementById("recTxt").textContent=recPrice;document.getElementById("autoTxt").textContent=price;}
+document.getElementById("plusBtn").onclick=function(){price++;updPrice();}; document.getElementById("minusBtn").onclick=function(){if(price>5){price--;updPrice();}};
+document.getElementById("autoT").onclick=function(){this.classList.toggle("on");};
+document.querySelectorAll(".tab").forEach(function(t){t.onclick=function(){document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});t.classList.add("on");vehicle=t.dataset.v;document.getElementById("fareTitle").textContent=vehicle+" • 2 min";document.getElementById("fareBox").style.display="block"; if(fromPos)setFrom(fromPos,fromName);};});
+document.getElementById("routeBtn").onclick=function(){show("sRoute");};
+document.querySelectorAll("[data-to]").forEach(function(b){b.onclick=function(){toName=b.dataset.to;document.getElementById("fareBox").style.display="block";};});
+document.querySelectorAll("[data-to2]").forEach(function(b){b.onclick=function(){toName=b.dataset.to2;document.getElementById("toInput").value=toName;document.getElementById("fareBox").style.display="block";openMap();};});
+document.getElementById("confirmRoute").onclick=function(){toName=document.getElementById("toInput").value.trim()||"Cmc drarga";document.getElementById("fareBox").style.display="block";openMap();};
+document.getElementById("findBtn").onclick=async function(){if(!fromPos){document.getElementById("locNotif").classList.add("show");checkLoc();return;} const u=cur(); if(!u){show("s2");return;}
+ const row={tel:u.tel,name:u.prenom+" "+u.nom,from_lat:fromPos[0],from_lng:fromPos[1],from_name:fromName,to_name:toName,dist:+lastDist.toFixed(1),offer:price,vehicle:vehicle,status:"waiting",created_at:new Date().toISOString()};
+ let s=await dbIns("requests",row); if(s)currentReqId=s.id; else{row.id=Date.now();currentReqId=row.id;const rs=getReqs();rs.unshift(row);saveReqs(rs);}
+ document.getElementById("offersBox").innerHTML="<div class='card'>⏳ Searching drivers…</div>"; pollOffers();};
+async function pollOffers(){let offs=getOffers().filter(function(o){return o.request_id===currentReqId;}); if(sb){const d=await dbList("offers"); if(d)offs=d.filter(function(o){return o.request_id===currentReqId;});}
+ document.getElementById("offersBox").innerHTML=offs.length?offs.map(function(o){return "<div class='card'><b>"+o.driver_name+"</b><br><small>"+o.vehicle+" "+o.model+" • "+o.plate+"</small><b style='float:right'>DH "+o.price+"</b><div style='display:flex;gap:8px;margin-top:10px'><button class='pillBtn' onclick=\"window.acceptOffer('"+o.driver_tel+"','"+o.driver_name+"',"+o.price+")\">Accept DH "+o.price+"</button><button class='ghostPill' onclick=\"window.refuseOffer("+o.id+")\">Decline</button></div></div>";}).join(""):"<div class='card'>⏳ No offer yet…</div>";}
+window.acceptOffer=function(tel,name,pr){openChat(tel,name,pr);};
+window.refuseOffer=function(id){saveOffers(getOffers().filter(function(o){return o.id!==id;}));pollOffers();};
+function renderDriver(){show("sDrv"); const u=cur(); if(!u)return; document.getElementById("drvCard").innerHTML="<div class='card'><b>"+u.prenom+" "+u.nom+"</b><p style='color:#999'>"+u.vehicle+" "+u.model+" • "+u.plate+" • "+u.tel+"</p></div>"; renderReqs();}
+async function renderReqs(){let reqs=getReqs().filter(function(r){return r.status==="waiting";}); if(sb){const d=await dbList("requests"); if(d)reqs=d.filter(function(r){return r.status==="waiting";});}
+ reqs=reqs.map(function(r){r.d=km([30.42,-9.58],[r.from_lat||30.42,r.from_lng||-9.58]); r.dir=(r.to_name||"").toLowerCase().indexOf("cmc")>-1?"→ TO CMC":"← RETURN FROM CMC"; return r;}).sort(function(a,b){return a.d-b.d;});
+ document.getElementById("noReq").style.display=reqs.length?"none":"block";
+ document.getElementById("reqList").innerHTML=reqs.map(function(r,i){return "<div class='card'><b>"+(i===0?"📍 NEAREST — ":"")+r.dir+"</b><br><b>"+r.name+"</b><p style='color:#999;font-size:13px'>"+r.d.toFixed(1)+" km • "+r.from_name+" → "+r.to_name+" • "+r.dist+" km • "+r.tel+"</p><p style='font-size:24px;font-weight:900'>Client price: DH "+r.offer+"</p><input class='field' id='cp-"+r.id+"' type='number' min='"+r.offer+"' value='"+r.offer+"'><div style='display:flex;gap:8px'><button class='pillBtn' onclick=\"window.propose("+r.id+","+r.offer+")\">Accept at this price</button><button class='ghostPill' onclick=\"window.openChatD('"+r.tel+"','"+r.name+"')\">Chat</button></div></div>";}).join("");}
+window.demoClient=function(){const n=["Yassine El Fassi","Salma B.","Omar R."][Math.floor(Math.random()*3)]; const toCMC=Math.random()>0.5; const r={id:Date.now(),tel:"+2126"+Math.floor(10000000+Math.random()*89999999),name:n,from_lat:30.42+(Math.random()-0.5)*0.06,from_lng:-9.58+(Math.random()-0.5)*0.06,from_name:toCMC?"Agadir — Talborjt":"Cmc drarga",to_name:toCMC?"Cmc drarga":"Agadir — Talborjt",dist:+(2+Math.random()*6).toFixed(1),offer:15+Math.floor(Math.random()*15),vehicle:"Ride",status:"waiting",created_at:new Date().toISOString()}; const rs=getReqs(); rs.unshift(r); saveReqs(rs); renderReqs();};
+document.getElementById("refreshBtn").onclick=renderReqs;
+document.getElementById("onlineBtn").onclick=function(){online=!online;this.textContent=online?"● Online":"○ Offline";};
+window.propose=async function(reqId,off){const u=cur(); let pr=+document.getElementById("cp-"+reqId).value; if(pr<off)pr=off; const o={request_id:reqId,driver_tel:u.tel,driver_name:u.prenom+" "+u.nom,vehicle:u.vehicle,model:u.model,plate:u.plate,photo:"",price:pr,status:"proposed",created_at:new Date().toISOString()}; let s=await dbIns("offers",o); if(!s){o.id=Date.now();const a=getOffers();a.push(o);saveOffers(a);} toast("Offer sent","Prix: "+pr+" DH");};
+window.openChatD=function(tel,name){openChat(tel,name,0);};
+function openChat(tel,name,pr){const u=cur(); chatWith={tel:tel,name:name,price:pr}; chatRoom=[String(u.tel),String(tel)].sort().join("_"); document.getElementById("chatName").textContent=name; document.getElementById("chatAva").textContent=name.charAt(0); document.getElementById("chatTrip").innerHTML="<div class='card'>✅ Accepted — "+(pr?pr+" DH":"")+"<br><small>"+fromName+" → "+toName+" • Chat only</small></div>"; show("sChat"); renderChat();}
+async function renderChat(){let list=[]; try{list=JSON.parse(localStorage.getItem("chat_"+chatRoom)||"[]");}catch(e){} if(sb){const d=await sb.from("chats").select("*").eq("room",chatRoom).order("created_at",{ascending:true}); if(d.data&&d.data.length)list=d.data;} const u=cur(); document.getElementById("chatMsgs").innerHTML=list.length?list.map(function(m){return "<div class='msg "+(m.from_tel===u.tel?"me":"other")+"'><small>"+m.from_name+"</small><br>"+m.msg+"</div>";}).join(""):"<div class='msg other'>Salam, ana jay. Fin point de rencontre?</div>";}
+async function sendChat(){const u=cur(); const inp=document.getElementById("chatInp"); const txt=inp.value.trim(); if(!txt||!chatWith)return; const row={room:chatRoom,from_tel:u.tel,from_name:u.prenom,msg:txt,created_at:new Date().toISOString()}; if(sb)await dbIns("chats",row); let l=[]; try{l=JSON.parse(localStorage.getItem("chat_"+chatRoom)||"[]");}catch(e){} l.push(row); localStorage.setItem("chat_"+chatRoom,JSON.stringify(l)); inp.value=""; renderChat();}
+document.getElementById("chatSend").onclick=sendChat; document.getElementById("chatInp").addEventListener("keydown",function(e){if(e.key==="Enter")sendChat();});
+document.getElementById("chatBack").onclick=function(){const u=cur(); if(u&&u.role==="conducteur")renderDriver(); else openMap();};
+document.getElementById("chatSos").onclick=function(){toast("SOS","SOS — partagez trajet.");};
+document.getElementById("arrivedBtn").onclick=function(){toast("Arrived","Golt l client blli wselti.");};
+document.getElementById("completeBtn").onclick=function(){toast("Ride completed ★★★★★","Chapeau!"); openMap();};
+bc.onmessage=function(e){if(e.data.type==="reqs"&&document.getElementById("sDrv").classList.contains("on"))renderReqs(); if(e.data.type==="offers"&&currentReqId)pollOffers();};
+setInterval(function(){if(document.getElementById("sDrv").classList.contains("on"))renderReqs(); if(currentReqId&&document.getElementById("sMap").classList.contains("on"))pollOffers();},5000);
+updateSidebar();
+</script>
+</body>
+</html>
