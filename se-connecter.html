@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8">
+        <title>RideMates – Covoiturage entre étudiants de CMC Drarga</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <meta name="theme-color" content="#0B6E4F">
+        <meta name="description" content="Covoiturez avec des amis, partagez votre trajet et réduisez votre empreinte. Voiture ou moto, vers CMC Drarga.">
+        <link rel="icon" href="image/favicon.png">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="se-connecter.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    </head>
+    <body>
+        <div class="container" id="container">
+            <div class="form-container sign-up">
+                <form >
+                    <h1>Créer un compte</h1>
+                    <div class="social-icons">
+                        <a href="#" class="icon"><i class="fa-brands fa-google-g"></i></a>
+                    </div>
+                    <span>ou utiliser votre adresse email</span>
+                    <input type="text" placeholder="Nom complet"/>
+                    <input type="date" placeholder="Date de naissance"/>
+                    <input type="email" placeholder="Adresse email"/>
+                    <input type="password" placeholder="Mot de passe"/>
+                    <button type="submit">Créer un compte</button>  
+                </form>
+            </div>
+            <div class="form-container sign-in">
+                <form>
+                    <h1>Se connecter</h1>
+                    <div class="social-icons">
+                        <a href="#" class="icon"><i class="fa-brands fa-google-g" style="color:#B8F27B;"></i></a>
+                    </div>
+                    <span>ou utiliser votre compte</span>
+                    <input type="email" placeholder="Adresse email"/>
+                    <input type="password" placeholder="Mot de passe"/>
+                    <a href="#">Mot de passe oublié ?</a>
+                    <button type="submit">Se connecter</button>  
+                </form> 
+            </div>
+            <div class="toggle-container">
+                <div class="toggle">
+                    <div class="toggle-panel toggle-left">
+                        <h1>Bienvenue !</h1>
+                        <p>Pour rester en contact avec nous, veuillez vous connecter avec vos informations personnelles</p>
+                        <button class="hidden" id="login">Se connecter</button>
+                    </div>
+                    <div class="toggle-panel toggle-right">
+                        <h1>Bonjour !</h1>
+                        <p>Entrez vos informations personnelles et commencez avec nous</p>
+                        <button class="hidden" id="register">Créer un compte</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <script src="se-connecter.js"></script>
+    </body>
+</html>
