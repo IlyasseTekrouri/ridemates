@@ -67,6 +67,10 @@ body{
     margin-top:10px;
     cursor:pointer;
 }
+.container button:hover{
+     background:#F8F7FB;
+    border-color:#B8F27B;
+}
 
 .container button.hidden{
     background-color:transparent;
